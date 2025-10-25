@@ -5,13 +5,32 @@ import dotenv from "dotenv";
 import cors from "cors"
 
 dotenv.config();
+const allowedOrigins = [
+  "https://yomantosa.github.io",
+  "https://yomantosa.github.io/chalat",
+  "http://localhost:3000"
+];
 const app = express();
 
 app.use(express.json());
-app.use(cors({
-  origin: "*",
-  methods: ["POST", "GET"],
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.some((allowed) => origin.startsWith(allowed))) {
+        callback(null, true);
+      } else {
+        console.warn(`Blocked by CORS: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: "*",
+    allowedHeaders: "*",
+
+  })
+);
 
 app.post("/send", async (req, res) => {
   try {
